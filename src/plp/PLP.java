@@ -21,7 +21,7 @@ public abstract class PLP {
     private ArrayList<PlanningTypedParameter> plp_action_paramsOrdered = new ArrayList<>();//this variable is only to maintain the order of parameters
    // public ArrayList<PlanningStateVariable> stateVariables = new ArrayList<>();
 
-    public PLP(Document doc, PLP_TYPE type, ProblemFile pf)throws Exception {
+    public PLP(Document doc, PLP_TYPE type, EnvironmentFile pf)throws Exception {
         Type = type;
         Element root = doc.getDocumentElement();
 
@@ -109,12 +109,12 @@ public abstract class PLP {
         }
     }
 
-    protected void InitPreconditions(Document doc, ProblemFile pf)throws Exception {
+    protected void InitPreconditions(Document doc, EnvironmentFile pf)throws Exception {
         Node node = doc.getElementsByTagName("preconditions").item(0);//only one tag with this name in the file
         preconditions =  new Preconditions(node, pf.StateVariables, this);
     }
 
-    protected void InitSideEffects(Document doc, ProblemFile pf) throws Exception {
+    protected void InitSideEffects(Document doc, EnvironmentFile pf) throws Exception {
         Node node = doc.getElementsByTagName("side_effects").item(0);//only one tag with this name in the file
         sideEffects =  new SideEffects(node, pf.StateVariables, this);
         sideEffects.effects.forEach(effect->

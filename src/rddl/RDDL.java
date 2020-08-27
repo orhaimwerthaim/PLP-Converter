@@ -1,23 +1,21 @@
 package rddl;
 
-import jdk.jshell.execution.Util;
-import plp.ProblemFile;
+import plp.EnvironmentFile;
 import utils.Utils;
 
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.Scanner;
 
 public class RDDL {
     public static String DOMAIN_NAME = "plps_domain";
     public static String INSTANCE_NAME = "created_plps_instance";
 
-    public static String INIT_STATE_DOMAIN_NAME = "init_domain";
-    public static String INIT_STATE_INSTANCE_NAME = "init_instance";
+    public static String INIT_STATE_DOMAIN_NAME = "initial_state_domain";
+    public static String INIT_STATE_INSTANCE_NAME = "initial_state_instance";
 
     private String CREATED_RDDL_DIRECTORY = "/Created_RDDLs/";
-    private String CREATED_RDDL_INIT_STATE_DIRECTORY = "/Created_RDDLs/InitStateRDDLs/";
+    private String CREATED_RDDL_INIT_STATE_DIRECTORY = "/Created_RDDLs/InitialState/";
     HashMap<EBlocks, String> domainFileContent = new HashMap<>();
     HashMap<EInstaceBlocks, String> instanceFileContent = new HashMap<>();
     //line1 + "\n" + line2;
@@ -195,9 +193,9 @@ public class RDDL {
         //GetRDDLContent(templatePath);
     }
 
-    public void WriteToInstanceFile(ProblemFile pf, boolean forInitState) throws URISyntaxException {
-        String fileName = forInitState ? "created_init_instance.rddl2" : "instance.rddl2";
-        ;
+    public void WriteToInstanceFile(EnvironmentFile pf, boolean forInitState) throws URISyntaxException {
+        String fileName = forInitState ? "created_initial_state_instance.rddl2" : "instance.rddl2";
+
         String path = Utils.GetApplicationExecutablePath() +
                 (forInitState ? CREATED_RDDL_INIT_STATE_DIRECTORY : CREATED_RDDL_DIRECTORY)
                 + fileName;
@@ -235,8 +233,8 @@ public class RDDL {
         }
     }
 
-    public void WriteToInitStateDomainFile(ProblemFile pf) throws URISyntaxException {
-        String fileName = "created_init_state_domain.rddl";
+    public void WriteToInitStateDomainFile(EnvironmentFile pf) throws URISyntaxException {
+        String fileName = "created_initial_state_domain.rddl";
         String path = Utils.GetApplicationExecutablePath() + CREATED_RDDL_INIT_STATE_DIRECTORY + fileName;
 
         File directory = new File(path.substring(0, path.lastIndexOf("/")));

@@ -1,21 +1,20 @@
 package rddl;
 
 import plp.PLP;
-import plp.ProblemFile;
+import plp.EnvironmentFile;
 import plp.objects.PlanningStateVariable;
 import plp.objects.Predicate;
 import plp.objects.effect.*;
-import plp.problem_file_objects.InitialStateOption;
-import plp.problem_file_objects.StateVariableWithValue;
+import plp.environment_file_objects.InitialStateOption;
+import plp.environment_file_objects.StateVariableWithValue;
 import rddl.objects.ConditionalEffectToCPFS;
 import utils.Triplet;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CPFS_Line_ForStateVariables {
-    private static PlanningStateVariable GetPlanningStateVariable_ByName(String stateVarName, ProblemFile pf)
+    private static PlanningStateVariable GetPlanningStateVariable_ByName(String stateVarName, EnvironmentFile pf)
     {
         ArrayList<PlanningStateVariable> temp = new ArrayList<PlanningStateVariable>();
         pf.StateVariables.forEach(var->{ if (var.Name.equals(stateVarName)) { temp.add(var); } });
@@ -23,7 +22,7 @@ public class CPFS_Line_ForStateVariables {
         return temp.get(0);
     }
 
-    private static Triplet<String> GetCPFS_Blocks_ForPLP(PLP plp, String stateVarName, ProblemFile pf)
+    private static Triplet<String> GetCPFS_Blocks_ForPLP(PLP plp, String stateVarName, EnvironmentFile pf)
     {
         Triplet<String> res = new Triplet<>();
 
@@ -66,12 +65,12 @@ public class CPFS_Line_ForStateVariables {
         return GetConditionalEffectsByEffectedPredicate(plp, effectedStateVariable, null);
     }
 
-    private static ArrayList<ConditionalEffectToCPFS> GetConditionalEffectsByEffectedPredicate(ProblemFile pf, PlanningStateVariable effectedStateVariable)
+    private static ArrayList<ConditionalEffectToCPFS> GetConditionalEffectsByEffectedPredicate(EnvironmentFile pf, PlanningStateVariable effectedStateVariable)
     {
         return GetConditionalEffectsByEffectedPredicate(null, effectedStateVariable, pf);
     }
 
-    private static ArrayList<ConditionalEffectToCPFS> GetConditionalEffectsByEffectedPredicate(PLP plp, PlanningStateVariable effectedStateVariable, ProblemFile pf)
+    private static ArrayList<ConditionalEffectToCPFS> GetConditionalEffectsByEffectedPredicate(PLP plp, PlanningStateVariable effectedStateVariable, EnvironmentFile pf)
     {
         ArrayList<ConditionalEffectToCPFS> res = new ArrayList<>();
         ArrayList<Effect> effects = new ArrayList<>();
@@ -116,14 +115,17 @@ public class CPFS_Line_ForStateVariables {
         return res;
     }
 
-    public static String GetCPFS_LineForStateVar(ArrayList<PLP> plps, String stateVarName, ProblemFile pf) {
+    public static String GetCPFS_LineForStateVar(ArrayList<PLP> plps, String stateVarName, EnvironmentFile pf) {
         ArrayList<Triplet<String>> cpfsVarParts = new ArrayList<>();
 
-        for (PLP plp:plps) {
-            Triplet<String> t = GetCPFS_Blocks_ForPLP(plp, stateVarName, pf);
-            if (t != null && t.First != null) {
-                cpfsVarParts.add(t);
-            } }
+        if(plps != null) {
+            for (PLP plp : plps) {
+                Triplet<String> t = GetCPFS_Blocks_ForPLP(plp, stateVarName, pf);
+                if (t != null && t.First != null) {
+                    cpfsVarParts.add(t);
+                }
+            }
+        }
 
         //when plp is null it creates needed CPFS lines from ProblemFile 'pf'
         Triplet<String> t = GetCPFS_Blocks_ForPLP(null, stateVarName, pf);
@@ -141,7 +143,7 @@ public class CPFS_Line_ForStateVariables {
         return res.toString();
     }
 
-    public static String GetInitStateRDDL_CPFS_LineForStateVar(String stateVarName, ProblemFile pf) throws Exception {
+    public static String GetInitStateRDDL_CPFS_LineForStateVar(String stateVarName, EnvironmentFile pf) throws Exception {
         StringBuilder line = new StringBuilder();
         PlanningStateVariable stateVar = GetPlanningStateVariable_ByName(stateVarName, pf);
 

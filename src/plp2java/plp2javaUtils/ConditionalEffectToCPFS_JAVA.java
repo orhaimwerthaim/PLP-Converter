@@ -9,7 +9,6 @@ import plp.objects.effect.ConditionalEffect;
 import plp.objects.effect.Effect;
 import plp.objects.effect.IEffect;
 import rddl.PLP2RDDL_Utils;
-import rddl.PLPsToRDDL;
 import utils.Triplet;
 
 import java.util.ArrayList;

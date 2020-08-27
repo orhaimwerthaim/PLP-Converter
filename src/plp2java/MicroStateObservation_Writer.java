@@ -1,14 +1,12 @@
 package plp2java;
 
 import plp.PLP;
-import plp.ProblemFile;
-import plp.objects.PlanningStateVariable;
-import rddl.PLPsToRDDL;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import static rddl.PLPsToRDDL.GetObservationValueName;
+import static convert.PLP_Converter.GetObservationValueName;
+
 
 public class MicroStateObservation_Writer {
     String observationsVariables;

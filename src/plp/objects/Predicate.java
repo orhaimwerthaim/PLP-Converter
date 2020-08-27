@@ -6,14 +6,11 @@ import org.w3c.dom.NodeList;
 import plp.PLP;
 import plp.objects.effect.IEffect;
 import plp2java.plp2javaUtils.PLP2JavaUtils;
-import rddl.CPFS_Line;
 import rddl.PLP2RDDL_Utils;
-import rddl.PLPsToRDDL;
-import utils.LambdaCounter;
+import convert.PLP_Converter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Predicate implements ICondition, IEffect, IParameterized {
@@ -166,7 +163,7 @@ public class Predicate implements ICondition, IEffect, IParameterized {
     @Override
     public String getConditionForIf_JavaValidActions(ArrayList<PlanningTypedParameter> assignToParams, boolean underAndOrCondition, boolean IsObservationEffected) {
         boolean IsConstant = false;
-        for(PlanningStateVariable var: PLPsToRDDL.pf.StateVariables)
+        for(PlanningStateVariable var: PLP_Converter.pf.StateVariables)
         {
             if(Name.equals(var.Name)
                     && var.IsConstant)

@@ -1,4 +1,4 @@
-package plp.problem_file_objects;
+package plp.environment_file_objects;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

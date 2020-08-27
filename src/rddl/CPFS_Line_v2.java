@@ -1,5 +1,6 @@
 package rddl;
 
+import convert.PLP_Converter;
 import plp.PLP;
 import plp.PLP_Observe;
 import plp.objects.Predicate;
@@ -19,7 +20,7 @@ public class CPFS_Line_v2 {
         float successProb = isProbabilityOfSuccess ? actionSuccessProb.GetConditionalProbabilities()[0].Probability
                 : 1 - actionSuccessProb.GetConditionalProbabilities()[0].Probability;
         Triplet<String> t = new Triplet<>();
-        t.First = PLPsToRDDL.GetActionSuccessIntermName(plp) ;
+        t.First = PLP_Converter.GetActionSuccessIntermName(plp) ;
         t.First += "=";
         t.Second = "";
         t.Third = "if(" + PLP2RDDL_Utils.GetExistsForPredicate(plp.GetParams()) +
@@ -32,12 +33,12 @@ public class CPFS_Line_v2 {
     public static Triplet<String> Get_CPFS_For_ObservedCorrectValue(PLP_Observe plp)
     {
         Triplet<String> t = new Triplet<>();
-        t.First = PLPsToRDDL.GetObservationValueName(plp) + "'=";
+        t.First = PLP_Converter.GetObservationValueName(plp) + "'=";
         t.Second = "";
-        t.Third = "KronDelta(" + PLPsToRDDL.GetActionSuccessIntermName(plp) +
+        t.Third = "KronDelta(" + PLP_Converter.GetActionSuccessIntermName(plp) +
                 " + ("+
                 GetExistObserveAction_AndObservedPredicateValue(plp) +
-                "^"+ PLPsToRDDL.GetActionSuccessIntermName(plp)  + "^"+"Bernoulli("+plp.probabilityGivenObservedValue.GetConditionalProbabilities()[0].Probability+")));";
+                "^"+ PLP_Converter.GetActionSuccessIntermName(plp)  + "^"+"Bernoulli("+plp.probabilityGivenObservedValue.GetConditionalProbabilities()[0].Probability+")));";
         return t;
     }
 
@@ -64,9 +65,9 @@ public class CPFS_Line_v2 {
         {
             PLP2RDDL_Utils.ParametersNameChangeTo(plp.GetParams());
             String sEffectingUpon = plpEffect.effect.getEffectingUpon() == IEffect.EEffectingUpon.success ?
-                    "("+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" :
+                    "("+ PLP_Converter.GetActionSuccessIntermName(plp)+")^" :
                     plpEffect.effect.getEffectingUpon() == IEffect.EEffectingUpon.failure ?
-                            "(~"+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" : "";
+                            "(~"+ PLP_Converter.GetActionSuccessIntermName(plp)+")^" : "";
             if(plpEffect.effectType == EEffectType.Conditional) {
                 ConditionalEffect conEffect = (ConditionalEffect)plpEffect.effect;
                 second.append("if(" + sEffectingUpon +
@@ -102,9 +103,9 @@ public class CPFS_Line_v2 {
 //        effectsByPLP.forEach((plp,plpEffect)->
 //        {
 //            String sEffectingUpon = plpEffect.getEffectingUpon() == IEffect.EEffectingUpon.success ?
-//                    "("+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" :
+//                    "("+PLP_Converter.GetActionSuccessIntermName(plp)+")^" :
 //                    plpEffect.getEffectingUpon() == IEffect.EEffectingUpon.failure ?
-//                            "(~"+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" : "";
+//                            "(~"+PLP_Converter.GetActionSuccessIntermName(plp)+")^" : "";
 //
 //            second.append("if(" + sEffectingUpon +
 //                    "(" + GetExistsForPredicate(plp.GetParams()) +
@@ -204,9 +205,9 @@ public class CPFS_Line_v2 {
 //
 //            IEffect ieffect = plpEffects.get(0).effect;
 //            String sEffectingUpon = ieffect.getEffectingUpon() == IEffect.EEffectingUpon.success ?
-//                    "("+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" :
+//                    "("+PLP_Converter.GetActionSuccessIntermName(plp)+")^" :
 //                    ieffect.getEffectingUpon() == IEffect.EEffectingUpon.failure ?
-//                            "(~"+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" : "";
+//                            "(~"+PLP_Converter.GetActionSuccessIntermName(plp)+")^" : "";
 //
 //            second.append("if(" + sEffectingUpon +
 //                    "(" + PLP2RDDL_Utils.GetExistsForPredicate(plp.GetParams(), plpParamsNotInPredicate.get(plp)) +

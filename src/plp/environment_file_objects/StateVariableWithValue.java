@@ -1,15 +1,10 @@
-package plp.problem_file_objects;
+package plp.environment_file_objects;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import plp.PLP;
-import plp.objects.PlanningStateVariable;
-import plp.objects.PlanningTypedParameter;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class StateVariableWithValue {
     public String type;

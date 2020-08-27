@@ -1,26 +1,32 @@
-package rddl;
+package convert;
 
-import plp.*;
-import plp.objects.*;
+import plp.EnvironmentFile;
+import plp.PLP;
+import plp.PLP_Achieve;
+import plp.PLP_Observe;
+import plp.objects.PlanningStateVariable;
+import plp.objects.PlanningTypedParameter;
+import plp.objects.Predicate;
 import plp.objects.effect.*;
 import plp2java.*;
+import rddl.*;
 import utils.KeyValuePair;
 import utils.Triplet;
 
-import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-public class PLPsToRDDL {
-    public static ProblemFile pf = null;
+public class PLP_Converter {
+    public static EnvironmentFile pf = null;
     RDDL fileWriterRDDL;
     final static String PLP_SUCCESS_INTERM_PREFIX = "success_";
     final static String OBSERVATION_PVAR_PREFIX = "obsrv_";
-    public PLPsToRDDL(KeyValuePair<ProblemFile, ArrayList<PLP>> plpsWithProblemFile, boolean toRddl) throws Exception {
-        pf = plpsWithProblemFile.Key;
+    public PLP_Converter(KeyValuePair<EnvironmentFile, ArrayList<PLP>> plpsWithEnvironmentFile, EConvertType convertType) throws Exception {
+        pf = plpsWithEnvironmentFile.Key;
 
-        ArrayList<PLP> plps = plpsWithProblemFile.Value;
+        ArrayList<PLP> plps = plpsWithEnvironmentFile.Value;
 
         fileWriterRDDL = new RDDL();
         AddTypes(pf);
@@ -30,23 +36,34 @@ public class PLPsToRDDL {
         //add plps observation pvariables
         plps.forEach(plp-> AddObservationPvariable(plp));
 
-        if(toRddl) {
-            AddCPFS(plps, pf);
-            AddActionConstraint(plps);
-            AddReward(plps, pf);
-            AddInstaceFileData(pf);
+        switch (convertType)
+        {
+            case JavaSimulatorFromPLP:
+                writeJavaSimulatorFiles(pf, plps);
+                break;
+            case RDDL_FromPLP:
+                AddCPFS(plps, pf);
+                AddActionConstraint(plps);
+                AddReward(plps, pf);
+                AddInstaceFileData(pf);
 
-            fileWriterRDDL.WriteToInstanceFile(pf, false);
-            fileWriterRDDL.WriteToInstanceFile(pf, true);
-            fileWriterRDDL.WriteToDomainFile();
-            fileWriterRDDL.WriteToInitStateDomainFile(pf);
-        }
-        else {
-            writeJavaSimulatorFiles(pf, plps);
+                fileWriterRDDL.WriteToInstanceFile(pf, false);
+                fileWriterRDDL.WriteToInstanceFile(pf, true);
+                fileWriterRDDL.WriteToDomainFile();
+                fileWriterRDDL.WriteToInitStateDomainFile(pf);
+                break;
+            case RDDL_InitialStateFromEnvironmentFile:
+                AddCPFS(null, pf);
+                AddInstaceFileData(pf);
+
+                fileWriterRDDL.WriteToInstanceFile(pf, true);
+                fileWriterRDDL.WriteToInitStateDomainFile(pf);
+                break;
+
         }
     }
 
-    private void writeJavaSimulatorFiles(ProblemFile pf, ArrayList<PLP> plps) throws Exception {
+    private void writeJavaSimulatorFiles(EnvironmentFile pf, ArrayList<PLP> plps) throws Exception {
         new MicroState_Gate_Writer(pf);
         new MicroStateIntermediate_Writer(pf, plps);
         new MicroStateObservation_Writer(plps);
@@ -54,7 +71,7 @@ public class PLPsToRDDL {
         new MicroState_Writer(pf, plps);
     }
 
-    private void AddInstaceFileData(ProblemFile pf)
+    private void AddInstaceFileData(EnvironmentFile pf)
     {
         pf.ObjectsByType.forEach((type,objects)->
         {
@@ -87,9 +104,9 @@ public class PLPsToRDDL {
 
     }
 
-    private void AddReward(ArrayList<PLP> plps, ProblemFile pf) {
+    private void AddReward(ArrayList<PLP> plps, EnvironmentFile pf) {
         fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.reward,
-                "(if("+ProblemFile.GoalReachedStateVariableName+")then "+pf.GoalReachedReward +" else 0)");
+                "(if("+ EnvironmentFile.GoalReachedStateVariableName+")then "+pf.GoalReachedReward +" else 0)");
 
         for(PLP plp: plps)
         {
@@ -164,7 +181,7 @@ public class PLPsToRDDL {
         return pred;
     }
 
-    private static ArrayList<Triplet<String>> GetCPFS_Blocks_back(ArrayList<PLP> plps, ProblemFile pf) {
+    private static ArrayList<Triplet<String>> GetCPFS_Blocks_back(ArrayList<PLP> plps, EnvironmentFile pf) {
         HashMap<String,PlanningStateVariable> stateVarsNeedCPFS = new HashMap<>();
         //adding all state variables from all plps to one HashMap (we want to make sure anyone of them have CPFS line)
         pf.StateVariables.forEach(stateVar->
@@ -250,7 +267,7 @@ public class PLPsToRDDL {
         return result;
     }
 
-    private void AddCPFS(ArrayList<PLP> plps, ProblemFile pf) throws Exception {
+    private void AddCPFS(ArrayList<PLP> plps, EnvironmentFile pf) throws Exception {
         //adding cpfs lines for all state variables
         HashSet<String> stateVarsNeedCPFS = new HashSet<>();
         pf.StateVariables.forEach(stateVar ->
@@ -261,21 +278,26 @@ public class PLPsToRDDL {
         for (String stateVar : stateVarsNeedCPFS) {
             String line = CPFS_Line_ForStateVariables.GetCPFS_LineForStateVar(plps, stateVar, pf);
             if (line == null || line.isEmpty()) {
-                for (PLP plp:
-                        plps) {
-                    for (PlanningStateVariable var:
-                            pf.StateVariables) {
-                        if (var.Name.equals(stateVar)) {
-                            String prim = var.IsGlobalIntermediate ? "" : "'";
-                            String parameters = "(" + var.ParameterTypes.stream().map(x-> "?"+x).collect(Collectors.joining(","))+")";
-                            String fullNameWithPrim = var.Name + prim + (var.ParameterTypes.size() == 0 ? "" : parameters);
-                            String nextStateValue =var.IsGlobalIntermediate ? var.GetDefault() : var.Name + (var.ParameterTypes.size() == 0 ? "" : parameters);
-                            line = fullNameWithPrim + "=" + nextStateValue + ";";
-                            break;
+                if(plps != null) {
+                    for (PLP plp :
+                            plps) {
+                        for (PlanningStateVariable var :
+                                pf.StateVariables) {
+                            if (var.Name.equals(stateVar)) {
+                                String prim = var.IsGlobalIntermediate ? "" : "'";
+                                String parameters = "(" + var.ParameterTypes.stream().map(x -> "?" + x).collect(Collectors.joining(",")) + ")";
+                                String fullNameWithPrim = var.Name + prim + (var.ParameterTypes.size() == 0 ? "" : parameters);
+                                String nextStateValue = var.IsGlobalIntermediate ? var.GetDefault() : var.Name + (var.ParameterTypes.size() == 0 ? "" : parameters);
+                                line = fullNameWithPrim + "=" + nextStateValue + ";";
+                                break;
+                            }
                         }
-                    }}
+                    }
+                }
             }
-            fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.cpfs, line);
+            if(plps != null) {
+                fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.cpfs, line);
+            }
 
             String initStateDomainCPFS_Line =
                     CPFS_Line_ForStateVariables.GetInitStateRDDL_CPFS_LineForStateVar(stateVar, pf);
@@ -290,24 +312,28 @@ public class PLPsToRDDL {
         }
 
         //add cpfs intermediates for action success
-        plps.forEach(plp->
-        {
-            if (plp instanceof PLP_Achieve)
+        if(plps != null) {
+            plps.forEach(plp ->
             {
-                PLP_Achieve pA = (PLP_Achieve)plp;
-                fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.cpfs, CPFS_Utils.Get_CPFS_For_ActionSuccess(plp, pA.successFailProbability, true));
-            }
-            if (plp instanceof PLP_Observe)
-            {
-                PLP_Observe pO = (PLP_Observe)plp;
-                fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.cpfs,
-                        CPFS_Utils.Get_CPFS_For_ActionSuccess(plp, pO.failure_to_observe_probability, false));
-            }
+                if (plp instanceof PLP_Achieve) {
+                    PLP_Achieve pA = (PLP_Achieve) plp;
+                    fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.cpfs, CPFS_Utils.Get_CPFS_For_ActionSuccess(plp, pA.successFailProbability, true));
+                }
+                if (plp instanceof PLP_Observe) {
+                    PLP_Observe pO = (PLP_Observe) plp;
+                    fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.cpfs,
+                            CPFS_Utils.Get_CPFS_For_ActionSuccess(plp, pO.failure_to_observe_probability, false));
+                }
 
-        });
+            });
+        }
+
+        String illegalActionCPFS = "obsrv_illegal_action=false;";
+        fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.cpfs_for_initial_stats, illegalActionCPFS);
+        fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.cpfs, illegalActionCPFS);
     }
 
-    private void AddPvariables(ProblemFile pf, ArrayList<PLP> plps) {
+    private void AddPvariables(EnvironmentFile pf, ArrayList<PLP> plps) {
         AddActions(plps);
 
         for (PlanningStateVariable stateVar :
@@ -346,9 +372,13 @@ public class PLPsToRDDL {
             fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.pvariables, sPvar);
             fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.pvariables_for_initial_stats, sPvar);
         }
+
+        String illegalActionObsr = "obsrv_illegal_action: { observ-fluent , bool};";
+        fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.pvariables, illegalActionObsr);
+        fileWriterRDDL.AppendLineToRDDL_DomainBlock(RDDL.EBlocks.pvariables_for_initial_stats, illegalActionObsr);
     }
 
-    private void AddTypes(ProblemFile pf) {//discrete_location : object;//rooms etc..
+    private void AddTypes(EnvironmentFile pf) {//discrete_location : object;//rooms etc..
         pf.ObjectsByType.keySet().stream()
                 .forEach(objectType ->
                         {

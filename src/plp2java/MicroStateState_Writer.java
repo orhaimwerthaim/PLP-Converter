@@ -1,9 +1,8 @@
 package plp2java;
 
 import plp.PLP;
-import plp.ProblemFile;
+import plp.EnvironmentFile;
 import plp.objects.PlanningStateVariable;
-import rddl.PLPsToRDDL;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ public class MicroStateState_Writer {
     String constructorVarInit;
     String toStringPart1;
     String toStringPart2;
-    public MicroStateState_Writer(ProblemFile pf, ArrayList<PLP> plps) throws URISyntaxException {
+    public MicroStateState_Writer(EnvironmentFile pf, ArrayList<PLP> plps) throws URISyntaxException {
         variableDefinitions = "";
         constructorVarInit = "";
         toStringPart1 = "";

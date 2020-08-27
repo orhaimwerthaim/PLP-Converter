@@ -1,21 +1,12 @@
 package rddl;
 
+import convert.PLP_Converter;
 import plp.PLP;
-import plp.PLP_Observe;
 import plp.objects.*;
-import plp.objects.condition.AndOrCondition;
-import plp.objects.condition.Condition;
-import plp.objects.condition.NotCondition;
 import plp.objects.effect.*;
-import utils.KeyValuePair;
-import utils.LambdaCounter;
 import utils.Triplet;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class CPFS_Line {
 //    public static  Triplet Get_CPFS_ConditionalLine(ConditionalEffect conditionalEffect, HashMap<PLP, ConditionalEffect> effectsByPLP) {
@@ -26,9 +17,9 @@ public class CPFS_Line {
 //        effectsByPLP.forEach((plp, plpEffect)->
 //        {
 //            String sEffectingUpon = conditionalEffect.effect.effect.getEffectingUpon() == IEffect.EEffectingUpon.success ?
-//                    "("+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" :
+//                    "("+PLP_Converter.GetActionSuccessIntermName(plp)+")^" :
 //                    conditionalEffect.effect.effect.getEffectingUpon() == IEffect.EEffectingUpon.failure ?
-//                            "(~"+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" : "";
+//                            "(~"+PLP_Converter.GetActionSuccessIntermName(plp)+")^" : "";
 //
 //            second.append("if(" + sEffectingUpon +
 //                    "(" + plpEffect.condition.condition.getConditionForIf() +
@@ -61,9 +52,9 @@ public class CPFS_Line {
         {
             PLP2RDDL_Utils.ParametersNameChangeTo(plp.GetParams());
             String sEffectingUpon = plpEffect.effect.getEffectingUpon() == IEffect.EEffectingUpon.success ?
-                    "("+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" :
+                    "("+ PLP_Converter.GetActionSuccessIntermName(plp)+")^" :
                     plpEffect.effect.getEffectingUpon() == IEffect.EEffectingUpon.failure ?
-                            "(~"+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" : "";
+                            "(~"+ PLP_Converter.GetActionSuccessIntermName(plp)+")^" : "";
             if(plpEffect.effectType == EEffectType.Conditional) {
                 ConditionalEffect conEffect = (ConditionalEffect)plpEffect.effect;
                 second.append("if(" + sEffectingUpon +
@@ -99,9 +90,9 @@ public class CPFS_Line {
 //        effectsByPLP.forEach((plp,plpEffect)->
 //        {
 //            String sEffectingUpon = plpEffect.getEffectingUpon() == IEffect.EEffectingUpon.success ?
-//                    "("+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" :
+//                    "("+PLP_Converter.GetActionSuccessIntermName(plp)+")^" :
 //                    plpEffect.getEffectingUpon() == IEffect.EEffectingUpon.failure ?
-//                            "(~"+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" : "";
+//                            "(~"+PLP_Converter.GetActionSuccessIntermName(plp)+")^" : "";
 //
 //            second.append("if(" + sEffectingUpon +
 //                    "(" + GetExistsForPredicate(plp.GetParams()) +
@@ -201,9 +192,9 @@ public class CPFS_Line {
 //
 //            IEffect ieffect = plpEffects.get(0).effect;
 //            String sEffectingUpon = ieffect.getEffectingUpon() == IEffect.EEffectingUpon.success ?
-//                    "("+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" :
+//                    "("+PLP_Converter.GetActionSuccessIntermName(plp)+")^" :
 //                    ieffect.getEffectingUpon() == IEffect.EEffectingUpon.failure ?
-//                            "(~"+PLPsToRDDL.GetActionSuccessIntermName(plp)+")^" : "";
+//                            "(~"+PLP_Converter.GetActionSuccessIntermName(plp)+")^" : "";
 //
 //            second.append("if(" + sEffectingUpon +
 //                    "(" + PLP2RDDL_Utils.GetExistsForPredicate(plp.GetParams(), plpParamsNotInPredicate.get(plp)) +

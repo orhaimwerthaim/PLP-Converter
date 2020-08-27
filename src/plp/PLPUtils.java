@@ -10,7 +10,7 @@ import java.io.File;
 public class PLPUtils {
     //get plp type and name.
 //throw exception if PLP name is different from it's file name
-    public static PLP GetPLP(String filePath, ProblemFile pf) throws Exception {
+    public static PLP GetPLP(String filePath, EnvironmentFile pf) throws Exception {
         File xmlFile = new File(filePath);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();

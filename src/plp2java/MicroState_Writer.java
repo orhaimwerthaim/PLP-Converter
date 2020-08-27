@@ -1,24 +1,20 @@
 package plp2java;
 
-import jdk.jshell.execution.Util;
 import plp.PLP;
 import plp.PLP_Achieve;
 import plp.PLP_Observe;
-import plp.ProblemFile;
+import plp.EnvironmentFile;
 import plp.objects.PlanningStateVariable;
 import plp.objects.PlanningTypedParameter;
 import plp.objects.effect.ConditionalEffect;
-import plp.problem_file_objects.InitialStateOption;
-import plp.problem_file_objects.StateVariableWithValue;
+import plp.environment_file_objects.InitialStateOption;
+import plp.environment_file_objects.StateVariableWithValue;
 import plp2java.plp2javaUtils.CPFS_Line_ForStateVariables_JAVA;
 import plp2java.plp2javaUtils.PLP2JavaUtils;
 import plp2java.plp2javaUtils.StateActionConstraintsForJava;
-import rddl.CPFS_Line_ForStateVariables;
 import utils.KeyValuePair;
-import utils.Triplet;
 import utils.Utils;
 
-import java.net.URISyntaxException;
 import java.util.*;
 
 public class MicroState_Writer {
@@ -42,7 +38,7 @@ String calcNextStateVariables = "";
 String nextGoalReachedMethod = "";
 
 
-    public void initNextGoalReachedMethod(ArrayList<PLP> plps, ProblemFile pf) {
+    public void initNextGoalReachedMethod(ArrayList<PLP> plps, EnvironmentFile pf) {
         nextGoalReachedMethod += "\n" +
                 "    private static boolean getGoal_reached(MicroStateState state, MicroStateIntermediate interm, MicroStateState next, ArrayList<Pair<String, String[]>> actions) {\n" ;
         ConditionalEffect condEffect = ((ConditionalEffect)pf.GoalReachedEffect.effect);
@@ -76,7 +72,7 @@ String nextGoalReachedMethod = "";
     }
 
 
-    private void initNextStateForVarMethod(ArrayList<PLP> plps, ProblemFile pf)
+    private void initNextStateForVarMethod(ArrayList<PLP> plps, EnvironmentFile pf)
     {
         for (PlanningStateVariable stateVar : pf.StateVariables) {
             if( stateVar.IsConstant || stateVar.IsObservation || stateVar.IsGlobalIntermediate)continue;
@@ -90,7 +86,7 @@ String nextGoalReachedMethod = "";
 
     }
 
-    public MicroState_Writer(ProblemFile pf, ArrayList<PLP> plps) throws Exception {
+    public MicroState_Writer(EnvironmentFile pf, ArrayList<PLP> plps) throws Exception {
         numOfinitStateOptions = pf.initalState.InitialStateOptions.size();
         initNextGoalReachedMethod(plps,pf);
         initNextStateForVarMethod(plps,pf);
@@ -117,7 +113,8 @@ String nextGoalReachedMethod = "";
 
     @Override
     public String toString() {
-        String str="package JavaSim2POMCP.POMCP.JavaGeneratos.Generated;\r\n\r\nimport JavaSim2POMCP.POMCP.JavaGeneratos.fixed.ParameterizedVar;\r\nimport java.util.function.IntConsumer;\r\nimport JavaSim2POMCP.POMCP.POMCP;\r\nimport JavaSim2POMCP.POMCP.UtilsClass.Pair;\r\n\r\nimport java.util.*;\r\nimport java.util.stream.Collectors;\r\n\r\npublic class MicroState {\r\n    public int reward;\r\n"+
+        String str="package JavaSim2POMCP.POMCP.JavaGeneratos.Generated;\r\n\r\nimport JavaSim2POMCP.POMCP.JavaGeneratos.fixed.ParameterizedVar;\r\nimport util.Pair;\r\n\r\nimport java.util.*;\r\nimport java.util.stream.Collectors;\n\n" +
+        "public class MicroState {\r\n    public int reward;\r\n"+
                 objectsVarDefinition + "\r\n    public static MicroStateIntermediate interm = new MicroStateIntermediate();\r\n\r\n"+
                 constantsVarDefinition + "    public MicroStateObservation observation;\r\n    public MicroStateState state;\r\n\r\n    static Random rand = new Random();\r\n\r\n    static\r\n    {\r\n"+
                 objectsVarInit + constantsVarInit + "    }\r\n\r\n    //Pair<String:'var name',String:'var type, can be bool/int'>\r\n"+
@@ -148,7 +145,7 @@ String nextGoalReachedMethod = "";
     }
 
 
-    private void initCalcNextStateVariables(ArrayList<PLP> plps, ProblemFile pf) {
+    private void initCalcNextStateVariables(ArrayList<PLP> plps, EnvironmentFile pf) {
         calcNextStateVariables += "\n" +
                 "    private static MicroStateState CalcNextStateVariables(MicroStateState state, MicroStateIntermediate interm, ArrayList<Pair<String,String[]>> actions)\n" +
                 "    {\n" +
@@ -325,7 +322,10 @@ String nextGoalReachedMethod = "";
                         count++;
                     }
 
-                    observationCalcMethods += "                        if (!"+predName +"O.value) break;\n" +
+                    observationCalcMethods += "                        if (!"+predName +"O.value) {\n" +
+                            "                            result += rand.nextFloat() < " + Utils.DecimalToString(pO.probabilityGivenObservedValue.GetConditionalProbabilities()[0].Probability) + " ? 0 : 1;\n" +
+                            "                            break;\n"+
+                            "                        }\n"+
                             "                        else {\n" ;
                 }
 
@@ -370,7 +370,7 @@ String nextGoalReachedMethod = "";
     }
 
 
-    private void initCalcRewardSection(ArrayList<PLP> plps, ProblemFile pf) {
+    private void initCalcRewardSection(ArrayList<PLP> plps, EnvironmentFile pf) {
         calcRewardsSection += "\n" +
                 "    private static int CalcReward(MicroStateState state, MicroStateIntermediate interm, MicroStateObservation observation, MicroStateState next, ArrayList<Pair<String,String[]>> actions)\n" +
                 "    {\n" +
@@ -392,7 +392,7 @@ String nextGoalReachedMethod = "";
     }
 
 
-    private ArrayList<KeyValuePair<Integer,StateVariableWithValue>> GetInitStateAssignments(ProblemFile pf)
+    private ArrayList<KeyValuePair<Integer,StateVariableWithValue>> GetInitStateAssignments(EnvironmentFile pf)
     {
         ArrayList<KeyValuePair<Integer,StateVariableWithValue>> res = new ArrayList<>();
 
@@ -412,7 +412,7 @@ String nextGoalReachedMethod = "";
         return res;
     }
 
-    private void initInitialState(ProblemFile pf) throws Exception {
+    private void initInitialState(EnvironmentFile pf) throws Exception {
         ArrayList<KeyValuePair<Integer, StateVariableWithValue>> assignmentsByOption = GetInitStateAssignments(pf);
         //ArrayList<StateVariableWithValue> assignments = pf.initalState.DeteministicStateAssignments;
 
@@ -492,7 +492,7 @@ String nextGoalReachedMethod = "";
 
 
 
-    private void InitRandomOption(ProblemFile pf)
+    private void InitRandomOption(EnvironmentFile pf)
     {
         for(int i =0; i < pf.initalState.InitialStateOptions.size();i++)
         {
@@ -504,7 +504,7 @@ String nextGoalReachedMethod = "";
     }
 
 
-    private void initConstantsVarInit(ProblemFile pf) throws Exception {
+    private void initConstantsVarInit(EnvironmentFile pf) throws Exception {
         for(PlanningStateVariable cType:pf.StateVariables)
         {
             if(!cType.IsConstant) continue;
@@ -571,7 +571,7 @@ String nextGoalReachedMethod = "";
 
     }
 
-    private void initObjectsVarDefinition(ProblemFile pf)
+    private void initObjectsVarDefinition(EnvironmentFile pf)
     {
         for(Map.Entry<String, ArrayList<String>> entry : pf.ObjectsByType.entrySet()) {
             String type = entry.getKey();
@@ -580,7 +580,7 @@ String nextGoalReachedMethod = "";
         }
     }
 
-    private void initObjectsVarInit(ProblemFile pf)
+    private void initObjectsVarInit(EnvironmentFile pf)
     {
         for(Map.Entry<String, ArrayList<String>> entry : pf.ObjectsByType.entrySet()) {
             String type = entry.getKey();
@@ -594,7 +594,7 @@ String nextGoalReachedMethod = "";
         }
     }
 
-    private void initConstantsVarDefinition(ProblemFile pf)
+    private void initConstantsVarDefinition(EnvironmentFile pf)
     {
         for(PlanningStateVariable v:pf.StateVariables)
         {

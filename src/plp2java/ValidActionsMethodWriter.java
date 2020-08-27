@@ -1,7 +1,7 @@
 package plp2java;
 
 import plp.PLP;
-import plp.ProblemFile;
+import plp.EnvironmentFile;
 import plp.objects.EConditionType;
 import plp.objects.PlanningTypedParameter;
 import plp.objects.Predicate;
@@ -113,7 +113,7 @@ public class ValidActionsMethodWriter {
         return constraint.toString();
     }
 
-    public static String getPLPValidActionsForStateMethod(PLP plp, ProblemFile pf)
+    public static String getPLPValidActionsForStateMethod(PLP plp, EnvironmentFile pf)
     {
 
         String getAllActions = "";

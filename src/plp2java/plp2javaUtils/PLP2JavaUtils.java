@@ -1,9 +1,8 @@
 package plp2java.plp2javaUtils;
 
+import convert.PLP_Converter;
 import plp.objects.PlanningStateVariable;
 import plp.objects.PlanningTypedParameter;
-import rddl.PLP2RDDL_Utils;
-import rddl.PLPsToRDDL;
 import utils.LambdaCounter;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ public class PLP2JavaUtils {
 
     public static PlanningStateVariable GetStateVariableByName(String varName)
     {
-        for (PlanningStateVariable var: PLPsToRDDL.pf.StateVariables
+        for (PlanningStateVariable var: PLP_Converter.pf.StateVariables
              ) {
             if(var.Name.equals(varName))
             {

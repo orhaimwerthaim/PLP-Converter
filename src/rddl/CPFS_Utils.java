@@ -1,5 +1,6 @@
 package rddl;
 
+import convert.PLP_Converter;
 import plp.PLP;
 import plp.PLP_Achieve;
 import plp.PLP_Observe;
@@ -13,7 +14,7 @@ public class CPFS_Utils {
     public static String Get_CPFS_For_ActionSuccess(PLP plp, ProbabilityType actionSuccessProb, boolean isProbabilityOfSuccess) {
         float successProb = isProbabilityOfSuccess ? actionSuccessProb.GetConditionalProbabilities()[0].Probability
                 : 1 - actionSuccessProb.GetConditionalProbabilities()[0].Probability;
-        String res = PLPsToRDDL.GetActionSuccessIntermName(plp) +
+        String res = PLP_Converter.GetActionSuccessIntermName(plp) +
                 "=" +
                 "if(" + PLP2RDDL_Utils.GetExistsForPredicate(plp.GetParams()) +
                 " (" + plp.PlpNameWithParams(false) + ")" +
@@ -26,15 +27,15 @@ public class CPFS_Utils {
         if(plp instanceof PLP_Observe)
         {
             PLP_Observe po = (PLP_Observe)plp;
-            return "KronDelta(" + PLPsToRDDL.GetActionSuccessIntermName(plp) +
+            return "KronDelta(" + PLP_Converter.GetActionSuccessIntermName(plp) +
                     " + (" +
                     GetExistObserveAction_AndObservedPredicateValue(po) +
-                    "^" + PLPsToRDDL.GetActionSuccessIntermName(plp) +
+                    "^" + PLP_Converter.GetActionSuccessIntermName(plp) +
                     "^" + "Bernoulli(" + po.probabilityGivenObservedValue.GetConditionalProbabilities()[0].Probability + ")))";
         }
         if(plp instanceof PLP_Achieve) {
             if (IS_ACHIEVE_SUCCESS_OBSERVABLE) {
-                return "KronDelta(" + PLPsToRDDL.GetActionSuccessIntermName(plp) + " + 0)";
+                return "KronDelta(" + PLP_Converter.GetActionSuccessIntermName(plp) + " + 0)";
             }else {
                 return "KronDelta(0)";
             }
@@ -46,18 +47,17 @@ public class CPFS_Utils {
   public static ArrayList<String> Get_CPFS_For_Observations(ArrayList<PLP> plps) {
       ArrayList<String> lines = new ArrayList<>();
 
-        for(int i=0;i<plps.size();i++)
-        {
-            if(plps.get(i) instanceof PLP_Achieve && !((PLP_Achieve)plps.get(i)).IsActionSuccessObservable)
-            {
-                continue;
-            }
-            StringBuilder line = new StringBuilder(PLPsToRDDL.GetObservationValueName(plps.get(i)) + "=");
-            line.append(Get_CPFS_ObservationValue(plps.get(i)));
-            line.append(";");
-            lines.add(line.toString());
-        }
-
+      if (plps != null) {
+          for (int i = 0; i < plps.size(); i++) {
+              if (plps.get(i) instanceof PLP_Achieve && !((PLP_Achieve) plps.get(i)).IsActionSuccessObservable) {
+                  continue;
+              }
+              StringBuilder line = new StringBuilder(PLP_Converter.GetObservationValueName(plps.get(i)) + "=");
+              line.append(Get_CPFS_ObservationValue(plps.get(i)));
+              line.append(";");
+              lines.add(line.toString());
+          }
+      }
         return lines;
   }
 
@@ -67,11 +67,11 @@ public class CPFS_Utils {
                 "\t\t(exists_{?robot : robot, ?can : obj, ?location : discrete_location}observe_can(?robot,?can,?location) ^ \n" +
                 "\t\tobject_at(?can,?location)^success_observe_can^Bernoulli(0.95))) + KronDelta(1);\n";
 
-        String s3 = PLPsToRDDL.GetObservationValueName(plp) + "'=" +
-                "KronDelta(" + PLPsToRDDL.GetActionSuccessIntermName(plp) +
+        String s3 = PLP_Converter.GetObservationValueName(plp) + "'=" +
+                "KronDelta(" + PLP_Converter.GetActionSuccessIntermName(plp) +
                 " + (" +
                 GetExistObserveAction_AndObservedPredicateValue(plp) +
-                "^" + PLPsToRDDL.GetActionSuccessIntermName(plp) +
+                "^" + PLP_Converter.GetActionSuccessIntermName(plp) +
                 "^" + "Bernoulli(" + plp.probabilityGivenObservedValue.GetConditionalProbabilities()[0].Probability + ")));";
         return res;
     }*/

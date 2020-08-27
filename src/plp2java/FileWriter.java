@@ -1,16 +1,18 @@
 package plp2java;
 
-import plp.ProblemFile;
-import rddl.RDDL;
-import utils.Utils;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class FileWriter {
-    static String JavaSimDir = "/home/or/IdeaProjects/JavaSim2POMCP_JAVA/src/JavaSim2POMCP/POMCP/JavaGeneratos/Generated/";
+
+    static String JavaSimDir = "";//""/home/or/IdeaProjects/JavaSim2POMCP_JAVA/src/JavaSim2POMCP/POMCP/JavaGeneratos/Generated/";
+    public static void SetJavaSimulatorProjectPath(String solverProjectPath)
+    {
+        solverProjectPath += solverProjectPath.endsWith("/") ? "" : "/";
+        JavaSimDir = solverProjectPath + "src/JavaSim2POMCP/POMCP/JavaGeneratos/Generated/";
+    }
     public static void WriteToFile(String fileName, String content) throws URISyntaxException {
         String path = JavaSimDir + fileName;
         File directory = new File(path.substring(0, path.lastIndexOf("/")));

@@ -5,23 +5,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import plp.objects.PlanningStateVariable;
-import plp.objects.PlanningTypedParameter;
 import plp.objects.Predicate;
 import plp.objects.effect.ConditionalEffect;
 import plp.objects.effect.EEffectType;
 import plp.objects.effect.Effect;
 import plp.objects.effect.IEffect;
-import plp.problem_file_objects.InitialState;
-import plp.problem_file_objects.StateVariableWithValue;
+import plp.environment_file_objects.InitialState;
+import plp.environment_file_objects.StateVariableWithValue;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
-public class ProblemFile {
+public class EnvironmentFile {
     public static String GoalReachedStateVariableName = "goal_reached";
     public int GoalReachedReward;
     public String Name;
@@ -34,7 +32,7 @@ public class ProblemFile {
     public ArrayList<StateVariableWithValue> ConstantsAssignment = new ArrayList<>();
     public InitialState initalState;
 
-    public ProblemFile(String filePath) throws Exception {
+    public EnvironmentFile(String filePath) throws Exception {
         File xmlFile = new File(filePath);
         String fileName = xmlFile.getName();
 
@@ -45,7 +43,7 @@ public class ProblemFile {
 
         this.Name = root.getAttribute("name");
         if (!fileName.equals(this.Name + ".xml")) {
-            throw new Exception("The problem file 'name' attribute is not equal to problem file file name");
+            throw new Exception("The environment file 'name' attribute is not equal to environment file file name");
         }
         MaxConcurrentActions = Integer.parseInt(root.getAttribute("max_concurrent_actions"));
         Horizon = Integer.parseInt(root.getAttribute("horizon"));
@@ -101,7 +99,7 @@ public class ProblemFile {
                 if (paramElement.hasAttribute("type")) {
                     String type = paramElement.getAttribute("type");
                     if (type.equals("object")) {
-                        throw new Exception("Problem File xml exception: object type cannot be called 'object' (see 'typed_objects.type'");
+                        throw new Exception("Environment File xml exception: object type cannot be called 'object' (see 'typed_objects.type'");
 
                     }
                     ArrayList<String> objects = new ArrayList<>();
@@ -147,7 +145,7 @@ public class ProblemFile {
                     var.ParameterTypes.add(cNode.getTextContent());
                     if(!ObjectsByType.containsKey(cNode.getTextContent()))
                     {
-                        throw new Exception("Problem File xml exception: Problem File defines a parameter type '"+cNode.getTextContent()+"' that was not defined in 'typed_objects.type'");
+                        throw new Exception("Environment File xml exception: Environment File defines a parameter type '"+cNode.getTextContent()+"' that was not defined in 'typed_objects.type'");
                     }
                 }
             }
@@ -202,7 +200,7 @@ public class ProblemFile {
                     var.ParameterTypes.add(cNode.getTextContent());
                     if(!ObjectsByType.containsKey(cNode.getTextContent()))
                     {
-                        throw new Exception("Problem File xml exception: Problem File defines a parameter type '"+cNode.getTextContent()+"' that was not defined in 'typed_objects.type'");
+                        throw new Exception("Environment File xml exception: Environment File defines a parameter type '"+cNode.getTextContent()+"' that was not defined in 'typed_objects.type'");
                     }
                 }
             }

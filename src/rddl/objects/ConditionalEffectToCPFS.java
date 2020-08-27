@@ -8,10 +8,8 @@ import plp.objects.condition.Condition;
 import plp.objects.effect.ConditionalEffect;
 import plp.objects.effect.Effect;
 import plp.objects.effect.IEffect;
-import plp2java.MicroState_Writer;
-import plp2java.plp2javaUtils.PLP2JavaUtils;
 import rddl.PLP2RDDL_Utils;
-import rddl.PLPsToRDDL;
+import convert.PLP_Converter;
 import utils.Triplet;
 
 import java.util.ArrayList;
@@ -49,8 +47,8 @@ public class ConditionalEffectToCPFS {
         res.First = IsIntermediateOrObservation ? stateVariablePredicate.baseToString(false, true) + "="
                 : stateVariablePredicate.baseToString(true, true) + "=";
 
-        String upon = plp == null ? "" : effect.effect.getEffectingUpon() == IEffect.EEffectingUpon.failure ? "~" + PLPsToRDDL.GetActionSuccessIntermName(plp) :
-                effect.effect.getEffectingUpon() == IEffect.EEffectingUpon.success ? PLPsToRDDL.GetActionSuccessIntermName(plp) :
+        String upon = plp == null ? "" : effect.effect.getEffectingUpon() == IEffect.EEffectingUpon.failure ? "~" + PLP_Converter.GetActionSuccessIntermName(plp) :
+                effect.effect.getEffectingUpon() == IEffect.EEffectingUpon.success ? PLP_Converter.GetActionSuccessIntermName(plp) :
                         effect.effect.getEffectingUpon() == IEffect.EEffectingUpon.always ? PLP2RDDL_Utils.GetExistsForPredicate(plp.GetParams()) : "";
         String conditionIf = condition == null ? "" : condition.condition.getConditionForIf(stateVariablePredicate.Params, false, effectedStateVariable.IsObservation);
         upon += (upon.isEmpty() || conditionIf.isEmpty()) ? "" : "^";

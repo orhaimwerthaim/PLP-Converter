@@ -1,17 +1,16 @@
 package plp2java;
 
+import convert.PLP_Converter;
 import plp.PLP;
-import plp.ProblemFile;
+import plp.EnvironmentFile;
 import plp.objects.PlanningStateVariable;
-import rddl.PLPsToRDDL;
-import utils.Utils;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class MicroStateIntermediate_Writer {
     String intermediates;
-    public MicroStateIntermediate_Writer(ProblemFile pf, ArrayList<PLP> plps) throws URISyntaxException {
+    public MicroStateIntermediate_Writer(EnvironmentFile pf, ArrayList<PLP> plps) throws URISyntaxException {
         intermediates = "";
 
         for (PlanningStateVariable v:
@@ -25,7 +24,7 @@ public class MicroStateIntermediate_Writer {
         for (PLP plp:
              plps) {
             intermediates += "    public boolean "+
-                    PLPsToRDDL.GetActionSuccessIntermName(plp)+";\r\n";
+                    PLP_Converter.GetActionSuccessIntermName(plp)+";\r\n";
         }
         FileWriter.WriteToFile("MicroStateIntermediate.java", this.toString());
     }
